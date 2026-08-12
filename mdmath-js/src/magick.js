@@ -162,10 +162,15 @@ export async function rsvgConvert(svg, opts) {
     return new Promise((resolve, reject) => {
         const p = spawn(rsvg, args);
         let chunks = [];
+        let errChunks = [];
         p.stdout.on('data', (chunk) => chunks.push(chunk));
+        p.stderr.on('data', (chunk) => errChunks.push(chunk));
         p.on('close', (code) => {
-            if (code !== 0)
-                return reject(new Error(`rsvg-convert: exited with code ${code}`));
+            if (code !== 0) {
+                const stderr = Buffer.concat(errChunks).toString().trim();
+                const detail = stderr ? `: ${stderr}` : '';
+                return reject(new Error(`rsvg-convert: exited with code ${code}${detail}`));
+            }
 
             const data = Buffer.concat(chunks);
             resolve(data);

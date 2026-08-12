@@ -15,11 +15,34 @@ function M.size()
     return winsize
 end
 
+-- Fallback used when the terminal reports no pixel size via TIOCGWINSZ.
+-- Some terminals (notably Ghostty/macOS) fill row/col but leave xpixel/ypixel as 0.
+-- Returning 0 here makes rsvg-convert fail with InvalidMatrix / Invalid zoom factor.
+local FALLBACK_CELL_WIDTH = 10
+local FALLBACK_CELL_HEIGHT = 20
+
 function M.cell_size()
     local size = M.size()
 
-    local width = size.xpixel / size.col
-    local height = size.ypixel / size.row
+    local col = size.col
+    local row = size.row
+    local xpixel = size.xpixel
+    local ypixel = size.ypixel
+
+    local width, height
+    if col and col > 0 and xpixel and xpixel > 0 then
+        width = xpixel / col
+    end
+    if row and row > 0 and ypixel and ypixel > 0 then
+        height = ypixel / row
+    end
+
+    if not width or width <= 0 or width ~= width then
+        width = FALLBACK_CELL_WIDTH
+    end
+    if not height or height <= 0 or height ~= height then
+        height = FALLBACK_CELL_HEIGHT
+    end
 
     return width, height
 end
