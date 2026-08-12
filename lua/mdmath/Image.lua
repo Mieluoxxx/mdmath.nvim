@@ -7,16 +7,11 @@ if not stdout then
     error('failed to open stdout')
 end
 
--- Stay in the 256-color ID range. Unicode placeholders encode the image id
--- in the cell foreground color; 24-bit IDs via guifg are less reliable in
--- some terminals (including Ghostty).
-local _id = 1
+-- Keep a separate range from other Kitty graphics users such as image.nvim.
+local _id = 333
 local function next_id()
     local id = _id
     _id = _id + 1
-    if _id > 254 then
-        _id = 1
-    end
     return id
 end
 
@@ -29,20 +24,8 @@ local function write_raw(message)
     if tmux and tmux ~= "" then
         message = tmux_escape(message)
     end
-
-    -- Prefer the real terminal device. Neovim can swallow APC sequences
-    -- written only to stdout in some UI setups.
-    local tty = io.open('/dev/tty', 'w')
-    if tty then
-        tty:write(message)
-        tty:flush()
-        tty:close()
-        return
-    end
-
-    if stdout then
-        stdout:write(message)
-    end
+    -- Never write to /dev/tty while Neovim owns the UI: APC payloads leak as text.
+    stdout:write(message)
 end
 
 local function kitty_send(params, payload)
@@ -76,21 +59,27 @@ local function transmit_png(id, path)
         error('mdmath: empty image file: ' .. tostring(path))
     end
 
-    -- Direct transmission. File transmission (t=f) is silently ignored by
-    -- some terminals when the process cannot share the path (sandbox, macOS).
+    -- Direct transmission. File transmission (t=f) is often ignored when the
+    -- terminal cannot read Neovim's temp path.
     local encoded = vim.base64.encode(data):gsub('%-', '/')
     local chunks = {}
     for i = 1, #encoded, CHUNK do
         chunks[#chunks + 1] = encoded:sub(i, i + CHUNK - 1)
     end
 
+    local more = #chunks > 1 and 1 or 0
+    local control = {a = 't', i = id, f = 100, t = 'd', m = more, q = 2}
     for i, chunk in ipairs(chunks) do
-        local more = i < #chunks and 1 or 0
-        if i == 1 then
-            kitty_send({a = 't', i = id, f = 100, t = 'd', m = more, q = 2}, chunk)
+        kitty_send(control, chunk)
+
+        -- Continuation frames must contain only m=1/m=0. Do not repeat
+        -- a=T/U/r/c on the final chunk; placement is sent separately.
+        if i == #chunks - 1 then
+            control = {m = 0, q = 2}
         else
-            kitty_send({m = more, q = 2}, chunk)
+            control = {m = 1, q = 2}
         end
+        uv.sleep(1)
     end
 end
 
