@@ -65,8 +65,17 @@ function Image:_init(rows, cols, payload)
     self.rows = rows
     self.cols = cols
 
-    kitty_send({i = id, f = 100, t = 'f'}, payload)
-    kitty_send({i = id, U = 1, a = 'p', r = rows, c = cols})
+    -- Kitty Graphics Protocol (unicode placeholders):
+    -- 1) transmit image quietly (a=t, t=f, f=100/PNG)
+    -- 2) create a virtual placement (a=p, U=1)
+    -- Host app then paints U+10EEEE cells colored with the image id.
+    local path = payload
+    if type(path) == 'string' and path ~= '' and path:sub(1, 1) ~= '/' then
+        path = vim.fn.fnamemodify(path, ':p')
+    end
+
+    kitty_send({a = 't', i = id, f = 100, t = 'f', q = 2}, path)
+    kitty_send({a = 'p', U = 1, i = id, r = rows, c = cols, q = 2})
 end
 
 function Image.unicode_at(row, col)
