@@ -46,6 +46,21 @@ local function kitty_send(params, payload)
     end
 end
 
+-- `payload` is already base64 encoded when sending direct data chunks.
+-- Keep this separate from kitty_send(), which encodes raw file/control data.
+local function kitty_send_encoded(params, payload)
+    if not params.q then
+        params.q = 2
+    end
+
+    local tbl = {}
+    for k, v in pairs(params) do
+        tbl[#tbl + 1] = tostring(k) .. "=" .. tostring(v)
+    end
+
+    write_raw(string.format("\x1b_G%s;%s\x1b\\", table.concat(tbl, ","), payload))
+end
+
 local CHUNK = 4096
 
 local function transmit_png(id, path)
@@ -70,7 +85,7 @@ local function transmit_png(id, path)
     local more = #chunks > 1 and 1 or 0
     local control = {a = 't', i = id, f = 100, t = 'd', m = more, q = 2}
     for i, chunk in ipairs(chunks) do
-        kitty_send(control, chunk)
+        kitty_send_encoded(control, chunk)
 
         -- Continuation frames must contain only m=1/m=0. Do not repeat
         -- a=T/U/r/c on the final chunk; placement is sent separately.
