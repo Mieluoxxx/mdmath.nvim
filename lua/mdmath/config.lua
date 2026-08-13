@@ -8,6 +8,8 @@ local default_opts = {
     anticonceal = true,
     -- Hide the text when in the Insert Mode.
     hide_on_insert = true,
+    -- Replace inline LaTeX source with an image using its natural cell width.
+    compact_inline = true,
     -- Enable dynamic size for non-inline equations.
     dynamic = true,
     -- Configure the scale of dynamic-rendered equations.
@@ -59,6 +61,7 @@ function M.validate()
         foreground = {opts.foreground, 'string'},
         anticonceal = {opts.anticonceal, 'boolean'},
         hide_on_insert = {opts.hide_on_insert, 'boolean'},
+        compact_inline = {opts.compact_inline, 'boolean'},
         dynamic = {opts.dynamic, 'boolean'},
         dynamic_scale = {opts.dynamic_scale, 'number'},
         internal_scale = {opts.internal_scale, 'number'},

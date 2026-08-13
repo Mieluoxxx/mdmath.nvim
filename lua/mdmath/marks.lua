@@ -274,6 +274,11 @@ local function opts2extmark(opts, row, col)
             ephemeral = false,
             undo_restore = false,
         }
+        if opts.compact then
+            data.end_row = row
+            data.end_col = col + opts.text[2]
+            data.conceal = ''
+        end
         return { {
             data = data,
             row = row,

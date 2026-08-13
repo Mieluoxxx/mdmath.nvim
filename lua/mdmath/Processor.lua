@@ -74,7 +74,7 @@ end
 
 function Processor:request(data, cell_width, cell_height, width, height, flags, color, callback)
     -- width/height should be number of cells
-    -- flags: 0: none, 1: dynamic, 2: center, 3: dynamic + center
+    -- flags: bit 0: dynamic, bit 1: center, bit 2: compact inline
     --        TODO: flags should be a enum
 
     local identifier = get_next_id()

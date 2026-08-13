@@ -109,10 +109,18 @@ async function processEquation(identifier, equation, cWidth, cHeight, width, hei
         .replace(/style="[^"]+"/, '')
 
     const isDynamic = !!(flags & 1);
+    const isCompact = !!(flags & 4);
 
     let basePNG;
     let iWidth, iHeight;
-    if (isDynamic) {
+    if (isCompact) {
+        iHeight = height * cHeight * internalScale;
+        basePNG = await rsvgConvert(svg, {height: iHeight});
+
+        const {width: pngWidth} = await pngDimensions(basePNG);
+        width = Math.max(1, Math.ceil((pngWidth / internalScale) / cWidth));
+        iWidth = width * cWidth * internalScale;
+    } else if (isDynamic) {
         const zoom = 10 * dynamicScale * cHeight * internalScale / 96;
         basePNG = await rsvgConvert(svg, {zoom});
 

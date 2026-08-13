@@ -89,7 +89,8 @@ function Equation:_create(res, err)
                 self.mark_id = marks.add(self.bufnr, self.pos[1], self.pos[2], {
                     text = { text, self.text:len() },
                     color = color,
-                    text_pos = 'overlay',
+                    text_pos = self.compact and 'inline' or 'overlay',
+                    compact = self.compact,
                 })
                 self.image = image
                 self.created = true
@@ -141,6 +142,7 @@ function Equation:_init(bufnr, row, col, text, opts)
     self.created = false
     self.valid = true
     self.color = color
+    self.compact = not self.lines and config.compact_inline and vim.fn.has('nvim-0.12') == 1
 
     -- remove trailing '$'
     self.equation = text:gsub('^%$*(.-)%$*$', '%1')
@@ -151,13 +153,13 @@ function Equation:_init(bufnr, row, col, text, opts)
     if self.lines then
         height = #self.lines
         if config.dynamic then
-            flags = 1 -- dynamic
+            flags = 3 -- dynamic + centered
         else
-            flags = 0
+            flags = 2 -- centered
         end
     else
         height = 1
-        flags = 2 -- centered
+        flags = self.compact and 6 or 2 -- centered + optional compact inline
     end
 
     local processor = Processor.from_bufnr(bufnr)
