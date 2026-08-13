@@ -255,6 +255,11 @@ local function opts2extmark(opts, row, col)
                     ephemeral = false,
                     undo_restore = false,
                 }
+                if opts.conceal then
+                    data.end_row = row
+                    data.end_col = col + line[2]
+                    data.conceal = ''
+                end
                 table.insert(extmarks, {
                     data = data,
                     row = row,

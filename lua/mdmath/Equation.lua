@@ -72,6 +72,7 @@ function Equation:_create(res, err)
                     lines = lines,
                     color = color,
                     text_pos = 'overlay',
+                    conceal = config.compact_inline and vim.fn.has('nvim-0.12') == 1,
                 })
                 self.image = image
                 self.created = true
