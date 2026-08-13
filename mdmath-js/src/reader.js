@@ -46,7 +46,7 @@ reader.listen = function(callback) {
                     data
                 };
                 callback(response);
-            } else if(type == 'iscale' || type == 'dscale') {
+            } else if(['iscale', 'dscale', 'inscale', 'discale'].includes(type)) {
                 const scale = await stream.readFloat();
 
                 const response = {

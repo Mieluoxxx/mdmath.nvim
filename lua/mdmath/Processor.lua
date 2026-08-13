@@ -72,9 +72,19 @@ function Processor:setDynamicScale(scale)
     self:_assert(not err, 'failed to set dynamic scale: ', err)
 end
 
+function Processor:setInlineScale(scale)
+    local code, err = self.pipes[0]:write(string.format("0:inscale:%.2f:", scale))
+    self:_assert(not err, 'failed to set inline scale: ', err)
+end
+
+function Processor:setDisplayScale(scale)
+    local code, err = self.pipes[0]:write(string.format("0:discale:%.2f:", scale))
+    self:_assert(not err, 'failed to set display scale: ', err)
+end
+
 function Processor:request(data, cell_width, cell_height, width, height, flags, color, callback)
     -- width/height should be number of cells
-    -- flags: bit 0: dynamic, bit 1: center, bit 2: compact inline
+    -- flags: bit 0: dynamic, bit 1: center, bit 2: compact inline, bit 3: scaled display
     --        TODO: flags should be a enum
 
     local identifier = get_next_id()
@@ -224,6 +234,8 @@ function Processor:_init()
     -- self:setForeground(config.foreground)
     self:setInternalScale(config.internal_scale)
     self:setDynamicScale(config.dynamic_scale)
+    self:setInlineScale(config.inline_scale)
+    self:setDisplayScale(config.display_scale)
 end
 
 function Processor:close()

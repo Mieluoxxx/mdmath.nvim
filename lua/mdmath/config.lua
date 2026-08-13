@@ -10,6 +10,10 @@ local default_opts = {
     hide_on_insert = true,
     -- Replace inline LaTeX source with an image using its natural cell width.
     compact_inline = true,
+    -- Height of inline equations relative to the terminal cell height.
+    inline_scale = 0.72,
+    -- Height ratio between display and inline equations.
+    display_scale = 1.5,
     -- Enable dynamic size for non-inline equations.
     dynamic = true,
     -- Configure the scale of dynamic-rendered equations.
@@ -62,10 +66,14 @@ function M.validate()
         anticonceal = {opts.anticonceal, 'boolean'},
         hide_on_insert = {opts.hide_on_insert, 'boolean'},
         compact_inline = {opts.compact_inline, 'boolean'},
+        inline_scale = {opts.inline_scale, 'number'},
+        display_scale = {opts.display_scale, 'number'},
         dynamic = {opts.dynamic, 'boolean'},
         dynamic_scale = {opts.dynamic_scale, 'number'},
         internal_scale = {opts.internal_scale, 'number'},
     }
+    assert(opts.inline_scale > 0, 'inline_scale must be greater than 0')
+    assert(opts.display_scale > 0, 'display_scale must be greater than 0')
 
     opts.foreground = require'mdmath.util'.hl_as_hex(opts.foreground)
 

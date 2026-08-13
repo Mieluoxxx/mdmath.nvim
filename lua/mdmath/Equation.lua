@@ -153,7 +153,7 @@ function Equation:_init(bufnr, row, col, text, opts)
     if self.lines then
         height = #self.lines
         if config.dynamic then
-            flags = 3 -- dynamic + centered
+            flags = config.compact_inline and 11 or 3 -- dynamic + centered + optional scaled display
         else
             flags = 2 -- centered
         end

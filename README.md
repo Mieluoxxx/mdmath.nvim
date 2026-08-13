@@ -63,6 +63,12 @@ opts = {
     anticonceal = true,
     -- Hide the text when in the Insert Mode.
     hide_on_insert = true,
+    -- Replace inline LaTeX source with an image using its natural cell width.
+    compact_inline = true,
+    -- Height of inline equations relative to the terminal cell height.
+    inline_scale = 0.72,
+    -- Height ratio between display and inline equations.
+    display_scale = 1.5,
     -- Enable dynamic size for non-inline equations.
     dynamic = true,
     -- Configure the scale of dynamic-rendered equations.
